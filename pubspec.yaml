@@ -12,6 +12,11 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.0
+  google_fonts: ^1.1.2
+  tflite: ^1.1.1
+  splashscreen:
+  animated_text: ^1.0.2
+  simple_animations: ^2.5.0
 
 dev_dependencies:
   flutter_test:
@@ -24,6 +29,7 @@ flutter:
     - logo_text.png
     - forklift.png
     - robot.jpg
+    - forklift_side.png
 
   # example:
   # fonts:
