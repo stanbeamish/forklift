@@ -3,7 +3,8 @@ import 'package:forklift/pages/start_page.dart';
 import 'package:splashscreen/splashscreen.dart';
 
 class MySplashScreen extends StatefulWidget {
-  MySplashScreen({Key key}) : super(key: key);
+  final cameras;
+  MySplashScreen(this.cameras, {Key key}) : super(key: key);
 
   @override
   _MySplashScreenState createState() => _MySplashScreenState();
@@ -14,7 +15,7 @@ class _MySplashScreenState extends State<MySplashScreen> {
   Widget build(BuildContext context) {
     return SplashScreen(
       seconds: 5,
-      navigateAfterSeconds: StartPage(),
+      navigateAfterSeconds: StartPage(widget.cameras),
       title: Text(
         'forklifter',
         style: TextStyle(

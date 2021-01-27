@@ -17,6 +17,7 @@ dependencies:
   splashscreen:
   animated_text: ^1.0.2
   simple_animations: ^2.5.0
+  camera: ^0.7.0
 
 dev_dependencies:
   flutter_test:

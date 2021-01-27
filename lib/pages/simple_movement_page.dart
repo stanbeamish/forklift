@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:forklift/components/home_forklift_animation.dart';
+import 'package:forklift/components/show_camera.dart';
+import 'package:forklift/utils/screen_arguments.dart';
 
 class SimpleMovementPage extends StatelessWidget {
-  const SimpleMovementPage({Key key}) : super(key: key);
+  static const SimpleMovementPageRoute = '/simplemove';
 
   @override
   Widget build(BuildContext context) {
+    final ScreenArguments args = ModalRoute.of(context).settings.arguments;
+
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -22,7 +26,7 @@ class SimpleMovementPage extends StatelessWidget {
               height: 12,
             ),
             Container(
-              child: Text('Camera'),
+              child: ShowCamera(args.cameras),
               color: Colors.lightBlue,
             ),
             SizedBox(
