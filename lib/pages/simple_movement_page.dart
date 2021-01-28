@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forklift/components/home_forklift_animation.dart';
 import 'package:forklift/components/show_camera.dart';
 import 'package:forklift/utils/screen_arguments.dart';
+import 'package:forklift/components/pathway.dart';
 
 class SimpleMovementPage extends StatelessWidget {
   static const SimpleMovementPageRoute = '/simplemove';
@@ -29,12 +30,13 @@ class SimpleMovementPage extends StatelessWidget {
               child: ShowCamera(args.cameras),
               color: Colors.lightBlue,
             ),
-            SizedBox(
-              height: 12,
-            ),
-            Container(
-              child: Text('Runway'),
-              color: Colors.lightGreen,
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                margin: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                child: Pathway(),
+                color: Theme.of(context).textSelectionColor.withOpacity(0.2),
+              ),
             ),
           ],
         ),
