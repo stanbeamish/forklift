@@ -1,7 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:forklift/utils/move_direction.dart';
-import 'package:simple_animations/simple_animations.dart';
-import 'package:supercharged/supercharged.dart';
 
 class Pathway extends StatefulWidget {
   const Pathway({Key key}) : super(key: key);
@@ -11,17 +11,22 @@ class Pathway extends StatefulWidget {
 }
 
 class _PathwayState extends State<Pathway> {
-  final GlobalKey _forkliftKey = GlobalKey();
-  final GlobalKey _pathwayKey = GlobalKey();
-  Size pathwaySize;
-  Size imageSize;
-  Offset imagePosition;
+  final GlobalKey _forkliftKey = GlobalKey(); // key to the forklift image
+  final GlobalKey _pathwayKey =
+      GlobalKey(); // key to the container of the payway
+  Size pathwaySize; // Size of the container the forklift runs
+  Size imageSize; // Size of the forklift image
 
-  final step = 5;
-  double maxLeft;
-  double maxBottom;
-  double currentLeft = 100;
-  double currentTop = 100;
+  final step = 1; // how many steps per movement
+  double maxLeft; // the calculated maximum of the pathway horizontally
+  double maxBottom; // the calculated maximum of the pathway vertically
+  double currentLeft = 100; //starting position
+  double currentTop = 100; // starting position
+
+  Timer timer;
+  var cron = Duration(milliseconds: 100);
+  bool isMoving = false;
+  Direction selectedDirection;
 
   @override
   void initState() {
@@ -37,7 +42,6 @@ class _PathwayState extends State<Pathway> {
   getSizeAndPosition() {
     RenderBox _imageBox = _forkliftKey.currentContext.findRenderObject();
     imageSize = _imageBox.size;
-    imagePosition = _imageBox.localToGlobal(Offset.zero);
 
     setState(() {});
   }
@@ -55,9 +59,26 @@ class _PathwayState extends State<Pathway> {
     setState(() {});
   }
 
-  startAnimation() {}
+  updatePosition(Timer timer) {
+    if (isMoving) {
+      setState(() {});
+      move(selectedDirection);
+    }
+  }
 
-  stopAnimation() {}
+  startMove() {
+    setState(() {
+      isMoving = true;
+      timer = Timer.periodic(cron, updatePosition);
+    });
+  }
+
+  stopMove() {
+    setState(() {
+      isMoving = false;
+      selectedDirection = Direction.none;
+    });
+  }
 
   move(Direction direction) {
     switch (direction) {
@@ -66,6 +87,7 @@ class _PathwayState extends State<Pathway> {
           currentTop -= step;
         } else {
           print("You have reached the top");
+          stopMove();
         }
         break;
       case Direction.down:
@@ -73,6 +95,7 @@ class _PathwayState extends State<Pathway> {
           currentTop += step;
         } else {
           print("You have reached the bottom end");
+          stopMove();
         }
         break;
       case Direction.left:
@@ -80,6 +103,7 @@ class _PathwayState extends State<Pathway> {
           currentLeft -= step;
         } else {
           print("You have reached the left start");
+          stopMove();
         }
         break;
       case Direction.right:
@@ -87,14 +111,15 @@ class _PathwayState extends State<Pathway> {
           currentLeft += step;
         } else {
           print("You have reached the right end");
+          stopMove();
         }
+        break;
+      case Direction.none:
         break;
     }
 
     setState(() {});
   }
-
-  stopMovement() {}
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +181,7 @@ class _PathwayState extends State<Pathway> {
                       ),
                       RaisedButton(
                         onPressed: () {
-                          stopMovement();
+                          stopMove();
                         },
                         child: Text('Stop'),
                       ),
@@ -166,10 +191,11 @@ class _PathwayState extends State<Pathway> {
                     ],
                   ),
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Size - $imageSize'),
-                      Text('Position - $imagePosition'),
-                      Text('MaxLeft: $maxLeft, MaxBottom: $maxBottom')
+                      //Text(' Image Size - H: ${imageSize.height}, W: ${imageSize.width}'),
+                      Text(' Pathway Horizontal Max: $maxLeft'),
+                      Text(' Pathway Vertical Max: $maxBottom'),
                     ],
                   ),
                 ],
@@ -186,7 +212,11 @@ class _PathwayState extends State<Pathway> {
       highlightColor: Colors.greenAccent,
       highlightedBorderColor: Colors.green,
       onPressed: () {
+        setState(() {
+          selectedDirection = direction;
+        });
         move(direction);
+        startMove();
       },
       child: Text(title),
     );
