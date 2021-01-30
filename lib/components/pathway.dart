@@ -11,22 +11,20 @@ class Pathway extends StatefulWidget {
 }
 
 class _PathwayState extends State<Pathway> {
+  double currentLeft = 100; //starting position
+  double currentTop = 100; // starting position
+  Size imageSize; // Size of the forklift image
+  bool isMoving = false;
+  double maxBottom; // the calculated maximum of the pathway vertically
+  double maxLeft; // the calculated maximum of the pathway horizontally
+  Size pathwaySize; // Size of the container the forklift runs
+  Direction selectedDirection;
+  final step = 1; // how many steps per movement
+  Timer timer;
+
   final GlobalKey _forkliftKey = GlobalKey(); // key to the forklift image
   final GlobalKey _pathwayKey =
       GlobalKey(); // key to the container of the payway
-  Size pathwaySize; // Size of the container the forklift runs
-  Size imageSize; // Size of the forklift image
-
-  final step = 1; // how many steps per movement
-  double maxLeft; // the calculated maximum of the pathway horizontally
-  double maxBottom; // the calculated maximum of the pathway vertically
-  double currentLeft = 100; //starting position
-  double currentTop = 100; // starting position
-
-  Timer timer;
-  var cron = Duration(milliseconds: 100);
-  bool isMoving = false;
-  Direction selectedDirection;
 
   @override
   void initState() {
@@ -61,7 +59,6 @@ class _PathwayState extends State<Pathway> {
 
   updatePosition(Timer timer) {
     if (isMoving) {
-      setState(() {});
       move(selectedDirection);
     }
   }
@@ -69,7 +66,7 @@ class _PathwayState extends State<Pathway> {
   startMove() {
     setState(() {
       isMoving = true;
-      timer = Timer.periodic(cron, updatePosition);
+      timer = Timer.periodic(Duration(milliseconds: 50), updatePosition);
     });
   }
 
@@ -77,6 +74,7 @@ class _PathwayState extends State<Pathway> {
     setState(() {
       isMoving = false;
       selectedDirection = Direction.none;
+      timer.cancel();
     });
   }
 
@@ -119,6 +117,21 @@ class _PathwayState extends State<Pathway> {
     }
 
     setState(() {});
+  }
+
+  OutlineButton buildOutlineButton(String title, Direction direction) {
+    return OutlineButton(
+      highlightColor: Colors.greenAccent,
+      highlightedBorderColor: Colors.green,
+      onPressed: () {
+        setState(() {
+          selectedDirection = direction;
+        });
+
+        startMove();
+      },
+      child: Text(title),
+    );
   }
 
   @override
@@ -204,21 +217,6 @@ class _PathwayState extends State<Pathway> {
           ),
         ],
       ),
-    );
-  }
-
-  OutlineButton buildOutlineButton(String title, Direction direction) {
-    return OutlineButton(
-      highlightColor: Colors.greenAccent,
-      highlightedBorderColor: Colors.green,
-      onPressed: () {
-        setState(() {
-          selectedDirection = direction;
-        });
-        move(direction);
-        startMove();
-      },
-      child: Text(title),
     );
   }
 }
