@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:forklift/components/home_forklift_animation.dart';
 import 'package:forklift/components/show_camera.dart';
 import 'package:forklift/utils/screen_arguments.dart';
@@ -15,7 +16,7 @@ class SimpleMovementPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           actions: [],
-          title: Text('Move the forklift around...'),
+          title: Text('Gabelstapler über Schaltflächen kontrolliert...'),
         ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -28,14 +29,12 @@ class SimpleMovementPage extends StatelessWidget {
             ),
             Container(
               child: ShowCamera(args.cameras),
-              color: Colors.lightBlue,
             ),
             Expanded(
               child: Container(
                 width: double.infinity,
                 margin: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 child: Pathway(),
-                color: Theme.of(context).textSelectionColor.withOpacity(0.2),
               ),
             ),
           ],

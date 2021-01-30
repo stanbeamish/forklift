@@ -3,6 +3,8 @@ import 'package:forklift/pages/start_page.dart';
 import 'package:splashscreen/splashscreen.dart';
 
 class MySplashScreen extends StatefulWidget {
+  static const SplashScreenRoute = '/';
+
   final cameras;
   MySplashScreen(this.cameras, {Key key}) : super(key: key);
 
@@ -23,7 +25,7 @@ class _MySplashScreenState extends State<MySplashScreen> {
         ),
       ),
       image: Image.asset(
-        'assets/logo_cube.png',
+        'assets/images/logo_cube.png',
       ),
       photoSize: 100,
     );

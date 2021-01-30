@@ -27,7 +27,7 @@ class ForkliftAnimation extends StatelessWidget {
                     padding:
                         EdgeInsets.only(top: 0, bottom: 5, left: 40, right: 40),
                     child: Image.asset(
-                      'assets/logo_text.png',
+                      'assets/images/logo_text.png',
                       height: 50,
                     ),
                     decoration: BoxDecoration(
@@ -50,7 +50,7 @@ class ForkliftAnimation extends StatelessWidget {
                     child: Container(
                       color: Colors.white,
                       child: Image.asset(
-                        'assets/forklift_side.png',
+                        'assets/images/forklift_side.png',
                         height: 50,
                       ),
                     ),

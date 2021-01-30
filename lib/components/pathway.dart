@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:forklift/utils/basic_logger.dart';
 import 'package:forklift/utils/move_direction.dart';
 
 class Pathway extends StatefulWidget {
@@ -34,6 +35,8 @@ class _PathwayState extends State<Pathway> {
       getSizeAndPosition();
       getPathwaySize();
       setPayWayNumbers();
+      currentLeft = maxLeft / 2;
+      currentTop = maxBottom / 2;
     });
   }
 
@@ -58,12 +61,14 @@ class _PathwayState extends State<Pathway> {
   }
 
   updatePosition(Timer timer) {
+    BasicLogger.log("updatePosition", "Updating the forklift position ...");
     if (isMoving) {
       move(selectedDirection);
     }
   }
 
   startMove() {
+    BasicLogger.log("startMove", "Start moving ...");
     setState(() {
       isMoving = true;
       timer = Timer.periodic(Duration(milliseconds: 50), updatePosition);
@@ -71,6 +76,7 @@ class _PathwayState extends State<Pathway> {
   }
 
   stopMove() {
+    BasicLogger.log("stopMove", "Stop moving ...");
     setState(() {
       isMoving = false;
       selectedDirection = Direction.none;
@@ -84,7 +90,7 @@ class _PathwayState extends State<Pathway> {
         if (currentTop >= step) {
           currentTop -= step;
         } else {
-          print("You have reached the top");
+          BasicLogger.log("move", "You have reached the top");
           stopMove();
         }
         break;
@@ -92,7 +98,7 @@ class _PathwayState extends State<Pathway> {
         if (currentTop < (maxBottom - step)) {
           currentTop += step;
         } else {
-          print("You have reached the bottom end");
+          BasicLogger.log("move", "You have reached the bottom end");
           stopMove();
         }
         break;
@@ -100,7 +106,7 @@ class _PathwayState extends State<Pathway> {
         if (currentLeft >= step) {
           currentLeft -= step;
         } else {
-          print("You have reached the left start");
+          BasicLogger.log("move", "You have reached the left start");
           stopMove();
         }
         break;
@@ -108,7 +114,7 @@ class _PathwayState extends State<Pathway> {
         if (currentLeft <= (maxLeft - step)) {
           currentLeft += step;
         } else {
-          print("You have reached the right end");
+          BasicLogger.log("move", "You have reached the right end");
           stopMove();
         }
         break;
@@ -123,13 +129,15 @@ class _PathwayState extends State<Pathway> {
     return OutlineButton(
       highlightColor: Colors.greenAccent,
       highlightedBorderColor: Colors.green,
-      onPressed: () {
-        setState(() {
-          selectedDirection = direction;
-        });
+      onPressed: isMoving
+          ? () {}
+          : () {
+              setState(() {
+                selectedDirection = direction;
+              });
 
-        startMove();
-      },
+              startMove();
+            },
       child: Text(title),
     );
   }
@@ -137,7 +145,6 @@ class _PathwayState extends State<Pathway> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      key: _pathwayKey,
       decoration: BoxDecoration(
         border: Border.all(
           color: Theme.of(context).primaryColor,
@@ -145,6 +152,7 @@ class _PathwayState extends State<Pathway> {
         ),
       ),
       child: Column(
+        key: _pathwayKey,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
@@ -157,7 +165,7 @@ class _PathwayState extends State<Pathway> {
                     left: currentLeft,
                   ),
                   child: Image.asset(
-                    'assets/forklift_2.png',
+                    'assets/images/forklift_2.png',
                     width: 60,
                     height: 40,
                     key: _forkliftKey,
