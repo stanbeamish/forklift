@@ -39,9 +39,9 @@ class CameraUtils {
         if (isDetecting) return;
         isDetecting = true;
         try {
-          TfliteUtils.classiFyImage(image);
+          TfliteUtils.classifyImage(image);
         } catch (error) {
-          print(error);
+          BasicLogger.log('_initializeCamera', error);
         }
       });
     });

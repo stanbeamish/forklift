@@ -2,15 +2,13 @@ import 'dart:async';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 
 import 'package:forklift/components/home_forklift_animation.dart';
-import 'package:forklift/main.dart';
 import 'package:forklift/models/result.dart';
-import 'package:forklift/pages/start_page.dart';
 import 'package:forklift/utils/basic_logger.dart';
 import 'package:forklift/utils/camera_utils.dart';
 import 'package:forklift/utils/move_direction.dart';
-
 import 'package:forklift/utils/tflite_utils.dart';
 
 class FingerMovePage extends StatefulWidget {
@@ -20,8 +18,13 @@ class FingerMovePage extends StatefulWidget {
   _FingerMovePageState createState() => _FingerMovePageState();
 }
 
-class _FingerMovePageState extends State<FingerMovePage> {
+class _FingerMovePageState extends State<FingerMovePage>
+    with TickerProviderStateMixin {
+  AnimationController _colorAnimController;
+  Animation _colorTween;
+
   List<Result> outputs;
+
   double currentLeft = 100; //starting position
   double currentTop = 100; // starting position
   Size imageSize; // Size of the forklift image
@@ -29,7 +32,7 @@ class _FingerMovePageState extends State<FingerMovePage> {
   double maxBottom; // the calculated maximum of the pathway vertically
   double maxLeft; // the calculated maximum of the pathway horizontally
   Size pathwaySize; // Size of the container the forklift runs
-  Direction selectedDirection;
+  Direction _selectedDirection;
   final step = 1; // how many steps per movement
   Timer timer;
 
@@ -41,9 +44,9 @@ class _FingerMovePageState extends State<FingerMovePage> {
     super.initState();
     // callback one the build method was executed
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      getSizeAndPosition();
-      getPathwaySize();
-      setPayWayNumbers();
+      _getSizeAndPosition();
+      _getPathwaySize();
+      _setPayWayNumbers();
       currentLeft = maxLeft / 2;
       currentTop = maxBottom / 2;
     });
@@ -55,6 +58,9 @@ class _FingerMovePageState extends State<FingerMovePage> {
     });
 
     CameraUtils.initializeCamera();
+
+    //Setup Animation
+    _setupAnimation();
 
     // subscribe to Tflite classify events
     TfliteUtils.tfliteResultsController.stream.listen(
@@ -72,91 +78,6 @@ class _FingerMovePageState extends State<FingerMovePage> {
         onError: (error) {
           BasicLogger.log('listen', error);
         });
-  }
-
-  getSizeAndPosition() {
-    RenderBox _imageBox = _forkliftKey.currentContext.findRenderObject();
-    imageSize = _imageBox.size;
-
-    setState(() {});
-  }
-
-  getPathwaySize() {
-    RenderBox _paywayBox = _pathwayKey.currentContext.findRenderObject();
-    pathwaySize = _paywayBox.size;
-    setState(() {});
-  }
-
-  setPayWayNumbers() {
-    maxLeft = pathwaySize.width - 2 - imageSize.width;
-    maxBottom =
-        ((pathwaySize.height / 16) * 15).round() - 12 - imageSize.height - 179;
-    setState(() {});
-  }
-
-  updatePosition(Timer timer) {
-    BasicLogger.log("updatePosition", "Updating the forklift position ...");
-    if (isMoving) {
-      move(selectedDirection);
-    }
-  }
-
-  startMove() {
-    BasicLogger.log("startMove", "Start moving ...");
-    setState(() {
-      isMoving = true;
-      timer = Timer.periodic(Duration(milliseconds: 50), updatePosition);
-    });
-  }
-
-  stopMove() {
-    BasicLogger.log("stopMove", "Stop moving ...");
-    setState(() {
-      isMoving = false;
-      selectedDirection = Direction.none;
-      timer.cancel();
-    });
-  }
-
-  move(Direction direction) {
-    switch (direction) {
-      case Direction.up:
-        if (currentTop >= step) {
-          currentTop -= step;
-        } else {
-          BasicLogger.log("move", "You have reached the top");
-          stopMove();
-        }
-        break;
-      case Direction.down:
-        if (currentTop < (maxBottom - step)) {
-          currentTop += step;
-        } else {
-          BasicLogger.log("move", "You have reached the bottom end");
-          stopMove();
-        }
-        break;
-      case Direction.left:
-        if (currentLeft >= step) {
-          currentLeft -= step;
-        } else {
-          BasicLogger.log("move", "You have reached the left start");
-          stopMove();
-        }
-        break;
-      case Direction.right:
-        if (currentLeft <= (maxLeft - step)) {
-          currentLeft += step;
-        } else {
-          BasicLogger.log("move", "You have reached the right end");
-          stopMove();
-        }
-        break;
-      case Direction.none:
-        break;
-    }
-
-    setState(() {});
   }
 
   @override
@@ -218,7 +139,7 @@ class _FingerMovePageState extends State<FingerMovePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        flex: 15,
+                        flex: 10,
                         child: Stack(
                           children: [
                             Container(
@@ -237,12 +158,59 @@ class _FingerMovePageState extends State<FingerMovePage> {
                         ),
                       ),
                       Expanded(
-                        flex: 1,
-                        child: Container(
-                          color: Colors.grey,
-                          width: double.infinity,
-                          child: Text(
-                              "Outputs: ${outputs[0].confidence}, ${outputs[0].id}, ${outputs[0].label}"),
+                        flex: 4,
+                        child: Column(
+                          children: [
+                            Container(
+                              color: Colors.grey,
+                              width: double.infinity,
+                              child: outputs != null && outputs.isNotEmpty
+                                  ? ListView.builder(
+                                      itemCount: outputs.length,
+                                      shrinkWrap: true,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return Column(
+                                          children: [
+                                            Text(outputs[index].label,
+                                                style: TextStyle(
+                                                    color: _colorTween.value,
+                                                    fontSize: 20)),
+                                            AnimatedBuilder(
+                                                animation: _colorAnimController,
+                                                builder: (context, child) {
+                                                  return LinearPercentIndicator(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.88,
+                                                    lineHeight: 14.0,
+                                                    percent: outputs[index]
+                                                        .confidence,
+                                                    progressColor:
+                                                        _colorTween.value,
+                                                  );
+                                                }),
+                                            Text(
+                                              '${(outputs[index].confidence * 100.0).toStringAsFixed(2)} %',
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 16.0),
+                                            ),
+                                          ],
+                                        );
+                                      })
+                                  : Center(
+                                      child: Text(
+                                        'Waiting for model to detect ...',
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 20.0),
+                                      ),
+                                    ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -254,6 +222,130 @@ class _FingerMovePageState extends State<FingerMovePage> {
         ),
       ),
     );
+  }
+
+  _evaluateOutputs(List outputs) {
+    if (outputs.isNotEmpty) {
+      var newDirection = Direction.none;
+
+      BasicLogger.log(
+          '_evaluateOutputs', 'EVALUATING outputs: ${outputs.length}');
+      if ((outputs[0].confidence * 100) > 80.0) {
+        switch (outputs[0].label) {
+          case 'Up':
+            setState(() {});
+            newDirection = Direction.up;
+            break;
+          case 'Down':
+            newDirection = Direction.down;
+            break;
+          case 'Left':
+            newDirection = Direction.left;
+            break;
+          case 'Right':
+            newDirection = Direction.right;
+            break;
+        }
+
+        setState(() {
+          _selectedDirection = newDirection;
+        });
+
+        _startMove();
+      }
+    }
+  }
+
+  void _getSizeAndPosition() {
+    RenderBox _imageBox = _forkliftKey.currentContext.findRenderObject();
+    imageSize = _imageBox.size;
+
+    setState(() {});
+  }
+
+  void _getPathwaySize() {
+    RenderBox _paywayBox = _pathwayKey.currentContext.findRenderObject();
+    pathwaySize = _paywayBox.size;
+    setState(() {});
+  }
+
+  void _setPayWayNumbers() {
+    maxLeft = pathwaySize.width - 2 - imageSize.width;
+    maxBottom =
+        ((pathwaySize.height / 16) * 15).round() - 12 - imageSize.height - 179;
+    setState(() {});
+  }
+
+  void _updatePosition(Timer timer) {
+    BasicLogger.log("updatePosition", "Updating the forklift position ...");
+    if (isMoving) {
+      _move(_selectedDirection);
+    }
+  }
+
+  void _setupAnimation() {
+    _colorAnimController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    _colorTween = ColorTween(begin: Colors.black, end: Colors.red)
+        .animate(_colorAnimController);
+  }
+
+  void _startMove() {
+    BasicLogger.log("startMove", "Start moving ...");
+    setState(() {
+      isMoving = true;
+      timer = Timer.periodic(Duration(milliseconds: 50), _updatePosition);
+    });
+  }
+
+  void _stopMove() {
+    BasicLogger.log("stopMove", "Stop moving ...");
+    setState(() {
+      isMoving = false;
+      _selectedDirection = Direction.none;
+      timer.cancel();
+    });
+  }
+
+  void _move(Direction direction) {
+    switch (direction) {
+      case Direction.up:
+        if (currentTop >= step) {
+          currentTop -= step;
+        } else {
+          BasicLogger.log("move", "You have reached the top");
+          _stopMove();
+        }
+        break;
+      case Direction.down:
+        if (currentTop < (maxBottom - step)) {
+          currentTop += step;
+        } else {
+          BasicLogger.log("move", "You have reached the bottom end");
+          _stopMove();
+        }
+        break;
+      case Direction.left:
+        if (currentLeft >= step) {
+          currentLeft -= step;
+        } else {
+          BasicLogger.log("move", "You have reached the left start");
+          _stopMove();
+        }
+        break;
+      case Direction.right:
+        if (currentLeft <= (maxLeft - step)) {
+          currentLeft += step;
+        } else {
+          BasicLogger.log("move", "You have reached the right end");
+          _stopMove();
+        }
+        break;
+      case Direction.none:
+        break;
+    }
+
+    setState(() {});
   }
 
   @override

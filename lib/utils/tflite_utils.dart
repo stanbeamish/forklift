@@ -20,13 +20,19 @@ class TfliteUtils {
     );
   }
 
-  static classiFyImage(CameraImage image) async {
+  static classifyImage(CameraImage image) async {
     await Tflite.runModelOnFrame(
-            bytesList: image.planes.map((plane) {
-              return plane.bytes;
-            }).toList(),
-            numResults: 2)
-        .then((value) {
+      bytesList: image.planes.map((plane) {
+        return plane.bytes;
+      }).toList(),
+      imageHeight: image.height,
+      imageWidth: image.width,
+      rotation: 90,
+      imageMean: 127.5,
+      imageStd: 127.5,
+      numResults: 2, // two results
+      threshold: 0.2,
+    ).then((value) {
       if (value.isNotEmpty) {
         BasicLogger.log('classifyImage', 'Results loaded. ${value.length}');
 
@@ -41,15 +47,14 @@ class TfliteUtils {
               '${element['confidence']}, ${element['index']}, ${element['label']}');
         });
       }
-
       _outputs.sort((a, b) => a.confidence.compareTo(b.confidence));
-
       tfliteResultsController.add(_outputs);
     });
   }
 
   static void disposeModel() {
     Tflite.close();
+
     tfliteResultsController.close();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
+import 'package:forklift/pages/register_page.dart';
 import 'package:forklift/pages/finger_move_page.dart';
 import 'package:forklift/utils/basic_logger.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -52,6 +53,8 @@ class _StartPageState extends State<StartPage> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.outbond_outlined), label: 'Schaltfläche'),
             BottomNavigationBarItem(
+                icon: Icon(Icons.how_to_reg_outlined), label: 'Anmelden'),
+            BottomNavigationBarItem(
                 icon: Icon(Icons.outbond_outlined), label: 'Tflite CNN'),
           ],
         ),
@@ -66,6 +69,13 @@ class _StartPageState extends State<StartPage> {
                 );
                 break;
               case 1:
+                Navigator.pushNamed(
+                  context,
+                  RegisterPage.RegisterPageRoute,
+                  arguments: ScreenArguments(widget.cameras),
+                );
+                break;
+              case 2:
                 Navigator.pushNamed(
                   context,
                   FingerMovePage.FingerMovePageRoute,

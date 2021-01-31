@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
+import 'package:forklift/pages/register_page.dart';
 import 'package:forklift/pages/detect_page.dart';
 import 'package:forklift/pages/finger_move_page.dart';
 
 import 'package:forklift/pages/simple_movement_page.dart';
 import 'package:forklift/pages/splashscreen_page.dart';
 import 'package:forklift/pages/start_page.dart';
+import 'package:forklift/utils/basic_logger.dart';
 import 'package:forklift/utils/special_color.dart';
 
 List<CameraDescription> cameras;
 
 Future<Null> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  cameras = await availableCameras();
+  try {
+    cameras = await availableCameras();
+  } on CameraException catch (error) {
+    BasicLogger.log(
+        'main', 'Error: ${error.code} \n Description: ${error.description}');
+  }
+
   runApp(MyApp());
 }
 
@@ -42,6 +50,7 @@ class MyApp extends StatelessWidget {
         SimpleMovementPage.SimpleMovementPageRoute: (context) =>
             SimpleMovementPage(),
         FingerMovePage.FingerMovePageRoute: (context) => FingerMovePage(),
+        RegisterPage.RegisterPageRoute: (context) => RegisterPage(),
       },
     );
   }
