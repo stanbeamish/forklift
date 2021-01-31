@@ -349,9 +349,10 @@ class _FingerMovePageState extends State<FingerMovePage>
   }
 
   @override
-  void dispose() {
+  void dispose() async {
     TfliteUtils.disposeModel();
-    CameraUtils.camera.dispose();
+    await CameraUtils.camera.dispose();
+
     BasicLogger.log('dispose', 'Clear resources ...');
     super.dispose();
   }

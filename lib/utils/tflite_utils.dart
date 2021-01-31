@@ -52,9 +52,8 @@ class TfliteUtils {
     });
   }
 
-  static void disposeModel() {
-    Tflite.close();
-
-    tfliteResultsController.close();
+  static void disposeModel() async {
+    await Tflite.close();
+    await tfliteResultsController.close();
   }
 }

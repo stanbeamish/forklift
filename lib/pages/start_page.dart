@@ -27,7 +27,7 @@ class _StartPageState extends State<StartPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            'A forklift - CNN animated on the command of your fingers',
+            'A forklift app',
             style: GoogleFonts.heebo(fontStyle: FontStyle.normal),
           ),
         ),
@@ -72,14 +72,13 @@ class _StartPageState extends State<StartPage> {
                 Navigator.pushNamed(
                   context,
                   RegisterPage.RegisterPageRoute,
-                  arguments: ScreenArguments(widget.cameras),
                 );
                 break;
               case 2:
                 Navigator.pushNamed(
                   context,
                   FingerMovePage.FingerMovePageRoute,
-                  arguments: ScreenArguments(widget.cameras),
+                  //arguments: ScreenArguments(widget.cameras),
                 );
                 break;
             }
