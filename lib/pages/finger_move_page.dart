@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:forklift/pages/start_page.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
 import 'package:forklift/components/home_forklift_animation.dart';
@@ -63,21 +64,16 @@ class _FingerMovePageState extends State<FingerMovePage>
     _setupAnimation();
 
     // subscribe to Tflite classify events
-    TfliteUtils.tfliteResultsController.stream.listen(
-        (value) {
-          // set results
-          outputs = value;
+    TfliteUtils.tfliteResultsController.stream.listen((value) {
+      // set results
+      outputs = value;
 
-          // do something with the results on the screen
-          setState(() {
-            // set to false to allow detection again
-            CameraUtils.isDetecting = false;
-          });
-        },
-        onDone: () {},
-        onError: (error) {
-          BasicLogger.log('listen', error);
-        });
+      // do something with the results on the screen
+      setState(() {
+        // set to false to allow detection again
+        CameraUtils.isDetecting = false;
+      });
+    }, onDone: () {}, onError: (error) {});
   }
 
   @override
@@ -159,58 +155,52 @@ class _FingerMovePageState extends State<FingerMovePage>
                       ),
                       Expanded(
                         flex: 4,
-                        child: Column(
-                          children: [
-                            Container(
-                              color: Colors.grey,
-                              width: double.infinity,
-                              child: outputs != null && outputs.isNotEmpty
-                                  ? ListView.builder(
-                                      itemCount: outputs.length,
-                                      shrinkWrap: true,
-                                      itemBuilder:
-                                          (BuildContext context, int index) {
-                                        return Column(
-                                          children: [
-                                            Text(outputs[index].label,
-                                                style: TextStyle(
-                                                    color: _colorTween.value,
-                                                    fontSize: 20)),
-                                            AnimatedBuilder(
-                                                animation: _colorAnimController,
-                                                builder: (context, child) {
-                                                  return LinearPercentIndicator(
-                                                    width:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.88,
-                                                    lineHeight: 14.0,
-                                                    percent: outputs[index]
-                                                        .confidence,
-                                                    progressColor:
-                                                        _colorTween.value,
-                                                  );
-                                                }),
-                                            Text(
-                                              '${(outputs[index].confidence * 100.0).toStringAsFixed(2)} %',
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 16.0),
-                                            ),
-                                          ],
-                                        );
-                                      })
-                                  : Center(
-                                      child: Text(
-                                        'Waiting for model to detect ...',
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 20.0),
-                                      ),
-                                    ),
-                            ),
-                          ],
+                        child: Container(
+                          color: Colors.grey,
+                          width: double.infinity,
+                          child: outputs != null && outputs.isNotEmpty
+                              ? ListView.builder(
+                                  itemCount: outputs.length,
+                                  shrinkWrap: true,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return Column(
+                                      children: [
+                                        Text(outputs[index].label,
+                                            style: TextStyle(
+                                                color: _colorTween.value,
+                                                fontSize: 20)),
+                                        AnimatedBuilder(
+                                            animation: _colorAnimController,
+                                            builder: (context, child) {
+                                              return LinearPercentIndicator(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.75,
+                                                lineHeight: 14.0,
+                                                percent:
+                                                    outputs[index].confidence,
+                                                progressColor:
+                                                    _colorTween.value,
+                                              );
+                                            }),
+                                        Text(
+                                          '${(outputs[index].confidence * 100.0).toStringAsFixed(2)} %',
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16.0),
+                                        ),
+                                      ],
+                                    );
+                                  })
+                              : Center(
+                                  child: Text(
+                                    'Waiting for model to detect ...',
+                                    style: TextStyle(
+                                        color: Colors.black, fontSize: 20.0),
+                                  ),
+                                ),
                         ),
                       ),
                     ],
@@ -350,10 +340,8 @@ class _FingerMovePageState extends State<FingerMovePage>
 
   @override
   void dispose() async {
-    TfliteUtils.disposeModel();
-    await CameraUtils.camera.dispose();
-
-    BasicLogger.log('dispose', 'Clear resources ...');
+    CameraUtils.isDetecting = false;
     super.dispose();
+    BasicLogger.log('dispose', 'Clear resources ...');
   }
 }

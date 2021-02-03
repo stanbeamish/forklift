@@ -30,11 +30,11 @@ class CameraUtils {
       enableAudio: false,
     );
 
-    initializeControllerFuture = camera.initialize().then((value) {
+    initializeControllerFuture = camera.initialize().then((value) async {
       BasicLogger.log('_initializeCamera',
           'Camera initialized, starting camera stream ...');
 
-      camera.startImageStream((CameraImage image) {
+      await camera.startImageStream((CameraImage image) {
         if (!TfliteUtils.modelLoaded) return;
         if (isDetecting) return;
         isDetecting = true;
@@ -45,5 +45,9 @@ class CameraUtils {
         }
       });
     });
+  }
+
+  static Future<void> disposeCamera() async {
+    await TfliteUtils.tfliteResultsController.close();
   }
 }

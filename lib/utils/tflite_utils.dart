@@ -8,6 +8,7 @@ import 'package:tflite/tflite.dart';
 class TfliteUtils {
   static StreamController<List<Result>> tfliteResultsController =
       new StreamController.broadcast();
+
   static List<Result> _outputs = List();
   static var modelLoaded = false;
 
@@ -52,8 +53,10 @@ class TfliteUtils {
     });
   }
 
-  static void disposeModel() async {
+  /*static Future<void> disposeModel() async {
     await Tflite.close();
+    BasicLogger.log('disposeModel', 'Tflite closed...');
     await tfliteResultsController.close();
-  }
+    BasicLogger.log('disposeModel', 'TfliteResultsController closed...');
+  }*/
 }

@@ -108,7 +108,7 @@ class _DetectPageState extends State<DetectPage> {
 
   @override
   void dispose() {
-    TfliteUtils.disposeModel();
+    //TfliteUtils.disposeModel();
     CameraUtils.camera.dispose();
     BasicLogger.log('dispose', 'Clear resources ...');
     super.dispose();
